@@ -47,7 +47,7 @@ active = init_state(1,:)';
 quiescent = init_state(2,:)';
 
 % Calculate vector of transition rates at initial time
-currents = W*active + I(:,1);
+currents = W*active + I(:,1); %% CHANGE CURRENT MATRIX
 trans = beta .* (active==0) .*feval(response_fn,currents) + ...
     alpha.*(active==1);
 cum_trans=cumsum(trans);
@@ -87,9 +87,9 @@ while (curr_time < t_max)
     
     % change transition rates of neurons affected by spike
     if(new_state(1) == 1)
-        currents = currents + W(:,i_update) + (Icurr - Ipast);
+        currents = currents + W(:,i_update) + (Icurr - Ipast); % ADD NEW INPUTS TO ACTIVATED NEURON
     elseif(new_state(1)==0)
-        currents = currents - W(:,i_update) - (Icurr - Ipast);
+        currents = currents - W(:,i_update) - (Icurr - Ipast); % REMOVE INPUTS FROM DEACTIVATED NEURON  
     end
     trans = beta .* (active==0) .*feval(response_fn,currents) + ...
         alpha.*(active==1);
