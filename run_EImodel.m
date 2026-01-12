@@ -145,7 +145,7 @@ Y = S(Ts>=cut);
 logx = log(X);
 logy = log(Y);
 [~, a2, ~, Ea2, R_PL] = linear_fit([logx' logy'],min(logx),max(logx),1,0);
-sigmaNuZ = 1/a2;
+sigmaNuZ = 1/a2; % WHYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY
 
 
 % Avalanches calcium events:

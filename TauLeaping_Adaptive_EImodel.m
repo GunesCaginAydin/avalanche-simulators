@@ -1,4 +1,4 @@
-function [spike_times,spike_ids,Irecons] = TauLeaping_EImodel(W,response_fn,beta,alpha,I,t_min,t_max,init_state)
+function [spike_times,spike_ids,Irecons] = TauLeaping_Adaptive_EImodel(W,response_fn,beta,alpha,I,t_min,t_max,init_state,params)
 % This is a basic implementation of the Tau Leaping Algorithm.
 %
 %
@@ -16,6 +16,8 @@ function [spike_times,spike_ids,Irecons] = TauLeaping_EImodel(W,response_fn,beta
 %
 %
 %
+eps = 0.03;
+nc = 10;
 
 N = size(W,1);
 Tau = 0.1;
@@ -36,9 +38,33 @@ for t in time_points
     propensity = beta .* active .* feval(response_fn, W*active' + Icurr)' ...
         + alpha .* ~active;
     
-    % Sample number of events for each neuron
-    num_events = poissrnd(propensity * Tau);
-    
+    % Adaptive Tau selection
+    if any(num_events > 0)
+        Lj = argmin(state_change / propensity);
+        criticality = (Lj <= nc) && (propensity > 0);
+        proder = sum(propensity/states * state_change)
+        mu = 0
+        var2 = 0 
+        taup = min([0, 0])
+        taupp = poissrnd(1/sum(propensity));
+
+        if taup*sum(propensity) <= 1 
+            print('Tau Leaping is not efficient with the current dynamics.\n Consider using Gillespie Algorithm instead.\n');
+            return;
+        end
+    end
+
+    if taup < taupp
+        Tau = taup;
+        num_events = poissrnd(propensity * Tau);
+        num_events(criticality) = 0;
+    elseif taup >= taupp
+        Tau = taupp;
+        num_events = poissrnd(propensity * Tau);
+        j = find(propensity ./ sum(propensity) > rand, 1, 'first');
+        num_events(j) = 1;
+    end
+
     % Update states
     for i = 1:N
         if num_events(i) > 0 
