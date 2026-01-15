@@ -1,21 +1,39 @@
 function [spike_times,spike_ids,Irecons] = TauLeaping_Adaptive_EImodel(W,response_fn,beta,alpha,I,t_min,t_max,init_state,params,mode)
-% This is a basic implementation of the Tau Leaping Algorithm.
+% This is an adjacent implementaion of the Tau Leaping Algorithm
+% which adaptively modifies the time-leap constant Tau according
+% to pre-defined error bounds and criticality conditions. For more
+% information, check the papers in the references section. 
 %
+% Inputs:
+% -W: is the weight matrix, n_neurons*n_neurons: W(i,j) is synaptic
+% weight TO the ith neuron FROM the jth
+% -response_fn: handle for response function (sigmoid, hyperbolic tan, etc.)
+% -input is the net input, 1*n_neurons
+% -alpha: is the rate at which active neurons decay to being
+% quiescent, 1*n_neurons
+% -beta: is the height of the response function, i.e. the rate at
+% which saturated-input quiescent neurons become active, 1*n_neurons
+% -init_state: is the initial state vector, 2*n_neurons
+% -mode: is the operation mode of Tau Leaping, defines how spike times are
+% spread around each leap interval.
 %
+% Outputs:
+% -spike_times: timing of each neuronal spike according to the chosen mode
+% -spike_ids: index of spiking neurons for each leap interval
+% -Irecons: reconstruction of the temporal neuronal inputs from the input
+% at each leap interval
 %
-%
-%
-%
-%
-%
-%
-%
-%
-%
-%
-%
-%
-%
+% References:
+% 
+% Citation: Benayoun M, Cowan JD, van Drongelen W, Wallace E (2010) 
+% Avalanches in a Stochastic Model of Spiking Neurons. 
+% PLoS Comput Biol 6(7): e1000846. 
+% https://doi.org/10.1371/journal.pcbi.1000846
+% 
+% Citation Yang Cao, Daniel T. Gillespie, Linda R. Petzold (2006); 
+% Efficient step size selection for the tau-leaping simulation method. 
+% J. Chem. Phys. 28 January 2006; 124 (4): 044109. 
+% https://doi.org/10.1063/1.2159468
 eps = 0.03;
 nc = 10;
 
@@ -35,37 +53,34 @@ current = W*active + I(:,1);
 propensity = beta .* ~active .* feval(response_fn, current) ...
     + alpha .* active;
     
-for t in time_points
+for t=t_min:Tau:t_max
     num_events = poissrnd(propensity * Tau);
-    
-    if any(num_events > 0)
-        Lj = argmin(state_change / propensity);
+
+    for i = 1:N
+        Lj = argmin(current / W(:,i));
         criticality = (Lj <= nc) && (propensity > 0);
-        proder = sum(propensity/states * state_change)
-        mu = 0
-        var2 = 0 
-        taup = min([0, 0])
+        proder = sum(W(:,i).W(criticality,i));
+        mu = sum(proder.*propensity(criticality))
+        var2 = sum(proder^.2*propensity(criticality)) 
+        taup = min([eps*sum(propensity)/abs(mu), eps^2*sum(propensity)^2/var2]);
         taupp = poissrnd(1/sum(propensity));
 
         if taup*sum(propensity) <= 1 
             print("Tau Leaping is not efficient with the current dynamics.\n
                         Consider using Gillespie's Algorithm instead.\n");
             return;
+        elseif taup < taupp
+            Tau = taup;
+            num_events = poissrnd(propensity * Tau);
+            num_events(criticality) = 0;
+        elseif taup >= taupp
+            Tau = taupp;
+            num_events = poissrnd(propensity * Tau);
+            j = find(cumsum(propensity(criticality)) ./ sum(propensity) > rand, 1, 'first');
+            num_events(criticality) = 0;
+            num_events(j) = 1;
         end
-    end
 
-    if taup < taupp
-        Tau = taup;
-        num_events = poissrnd(propensity * Tau);
-        num_events(criticality) = 0;
-    elseif taup >= taupp
-        Tau = taupp;
-        num_events = poissrnd(propensity * Tau);
-        j = find(propensity ./ sum(propensity) > rand, 1, 'first');
-        num_events(j) = 1;
-    end
-
-    for i = 1:N
         if num_events(i) > 0 
             if (num_events(i) // 2)
                 if active(i) == 1
