@@ -89,7 +89,7 @@ while (curr_time < t_max)
     if(new_state(1) == 1)
         currents = currents + W(:,i_update) + (Icurr - Ipast); % ADD NEW INPUTS TO ACTIVATED NEURON
     elseif(new_state(1)==0)
-        currents = currents - W(:,i_update) - (Icurr - Ipast); % REMOVE INPUTS FROM DEACTIVATED NEURON  
+        currents = currents - W(:,i_update) + (Icurr - Ipast); % REMOVE INPUTS FROM DEACTIVATED NEURON...
     end
     trans = beta .* (active==0) .*feval(response_fn,currents) + ...
         alpha.*(active==1);
