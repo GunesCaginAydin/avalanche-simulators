@@ -1,21 +1,46 @@
 function [spike_times,spike_ids,Irecons] = TauLeaping_EImodel(W,response_fn,beta,alpha,I,t_min,t_max,init_state,mode)
-% This is a basic implementation of the Tau Leaping Algorithm.
+% This is an implementation of Tau Leaping Algorithm for the analysis
+% of neuronal avalanches in Wilson-Cowan based stochastic
+% population dynamics. Tau Leaping belongs to the family of
+% stochastic simulation algoritmhs that are deriven from 
+% Master Equation of an ODE. Tau Leaping, just like SSA,
+% provides a compromise between continuous-deterministic solutions
+% obtainable by direct solutions of ODEs and deterministic-stochastic
+% solutions obtainable by exact/approximate solutions of the
+% Master Equation. It is possible to interpret stochastic simulators
+% also as an extension of systems with Langevin Dynamics. For more
+% information, refer to the 2006 paper of Gillespie.
 %
+% Inputs:
+% -W: is the weight matrix, n_neurons*n_neurons: W(i,j) is synaptic
+% weight TO the ith neuron FROM the jth
+% -response_fn: handle for response function (sigmoid, hyperbolic tan, etc.)
+% -input is the net input, 1*n_neurons
+% -alpha: is the rate at which active neurons decay to being
+% quiescent, 1*n_neurons
+% -beta: is the height of the response function, i.e. the rate at
+% which saturated-input quiescent neurons become active, 1*n_neurons
+% -init_state: is the initial state vector, 2*n_neurons
+% -mode: is the operation mode of Tau Leaping, defines how spike times are
+% spread around each leap interval.
 %
+% Outputs:
+% -spike_times: timing of each neuronal spike according to the chosen mode
+% -spike_ids: index of spiking neurons for each leap interval
+% -Irecons: reconstruction of the temporal neuronal inputs from the input
+% at each leap interval
 %
-%
-%
-%
-%
-%
-%
-%
-%
-%
-%
-%
-%
-%
+% References:
+% 
+% Citation: Benayoun M, Cowan JD, van Drongelen W, Wallace E (2010) 
+% Avalanches in a Stochastic Model of Spiking Neurons. 
+% PLoS Comput Biol 6(7): e1000846. 
+% https://doi.org/10.1371/journal.pcbi.1000846
+% 
+% Citation Yang Cao, Daniel T. Gillespie, Linda R. Petzold (2006); 
+% Efficient step size selection for the tau-leaping simulation method. 
+% J. Chem. Phys. 28 January 2006; 124 (4): 044109. 
+% https://doi.org/10.1063/1.2159468
 
 N = size(W,1);
 Tau = 0.1;
