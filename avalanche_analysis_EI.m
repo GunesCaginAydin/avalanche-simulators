@@ -126,7 +126,7 @@ end
             a = u(:,1)-xm;
             b = u(:,2)-ym;
             c = u(:,3)-zm;
-            ind = find( ( a.^2 + b.^2 + c.^2 ) <= rpix^2);         
+            ind =  ( a.^2 + b.^2 + c.^2 ) <= rpix^2;         
             
             % fill coarse
             pixs = u(ind,:);
@@ -165,7 +165,7 @@ end
         for j=1:nc
             
             nn = Comps{j};     
-            ii = find( ismember(LinIndx(:,1),nn) );
+            ii =  ismember(LinIndx(:,1),nn) ;
             units = LinIndx(ii,2);
             neurons = unique(units);           
             Ct(neurons,1) = 1;  % active (1) neuron
@@ -197,7 +197,7 @@ end
                     prevclus = Ctprev(indx==1,2);                    
                     up = unique(prevclus);
                     if length(up)>1 % it can be that neurons participate in 2 clusters, if this is the case, the largest avalanche absorbs the small ones
-                    si = histc( prevclus, up );
+                    si = histcounts( prevclus, up );
                     [~,index]=max(si);
                     Ct(neuron_in_cluster,2) = up(index);
                     else
@@ -264,10 +264,11 @@ Av_Center(S==0,:,:)=[];
 % avalanche (including neurons that activate more than one time during the
 % avalanche)
 
-    Life      = [];
-    AvSize    = [];
-    AvSize_E  = [];
-    AvSize_I  = [];
+    Life      = zeros(1,T);
+    AvSize    = zeros(1,T);
+    AvSize_E  = zeros(1,T);
+    AvSize_I  = zeros(1,T);
+    counter = 0;
     Nrows = size(Avalanche,1);
     for row = 1:Nrows
        
@@ -283,10 +284,11 @@ Av_Center(S==0,:,:)=[];
                 count_E = count_E + Av_cluster_E(row,t);
                 count_I = count_I + Av_cluster_I(row,t);
             else
-                Life      = [Life count_t];
-                AvSize    = [AvSize count_nb];
-                AvSize_E  = [AvSize_E count_E];
-                AvSize_I  = [AvSize_I count_I];
+                counter = counter + 1;
+                Life(counter) = count_t;
+                AvSize(counter) = count_nb;
+                AvSize_E(counter) = count_E;
+                AvSize_I(counter) = count_I;
                 count_t  =0; 
                 count_nb =0; 
                 count_E  =0; 

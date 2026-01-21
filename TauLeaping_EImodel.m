@@ -63,7 +63,7 @@ spike_ids = [];
 
 network_states(:,1) = active;
 event_count(:,1) = zeros(N,1);
-event_no = 0;
+leap_no = 0;
 
 current = W*active + I(:,1);
 propensity = beta .* ~active .* feval(response_fn, current) + ...
@@ -87,17 +87,17 @@ for t=t_min:Tau:t_max
             end
         end
     end
-    event_no = event_no + 1;
+    leap_no = leap_no + 1;
 
     Ipast = I(:,floor(t+1));
     Icurr = I(:,floor(t+Tau+1));
 
-    current = W*active + (Icurr - Ipast);
-    propensity = beta .* ~active .* feval(response_fn, current) ...
-        + alpha .* active;
+    current = current + (Icurr - Ipast);
+    propensity = beta .* ~active .* feval(response_fn, current) + ...
+        alpha .* active;
 
-    network_states(:,event_no) = active;
-    event_count(:,event_no) = num_events;
+    network_states(:,leap_no) = active;
+    event_count(:,leap_no) = num_events;
     Irc = [Irc Icurr];
 end
 
