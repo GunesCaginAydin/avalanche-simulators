@@ -1,0 +1,90 @@
+gillespie:
+	constant input A:0.001 0.005 0.1
+	step jumps A:0.001 0.005 0.1, int: 1 10 100
+	sinusoidal A:0.001 0.005 0.1, f: 0.001 0.01 0.1
+	step increase A:0.001-0.1 0.001-1.0
+tau:
+	sinusoidal A:0.001 0.005 0.1, f: 0.001 0.01 0.1
+
+
+
+
+BASH:
+	man <command>
+	alias name=<command>
+
+	ls -l -a -h -t -r -R -s -1 -d -F
+	cd .. ~ - /
+	pwd
+	echo -n -e -E <text>; echo <text>
+	cat <filename>, cat <filename1> <filename2> > <concatanedfilename>
+	cp -r -i -u <filename1> <filename2>
+	mv -i -u <filename1> <dir>, mv <filename1> <filename2>
+	rm -r -i -f <filename>
+	touch <filename>
+	mkdir -p -v -m <dir>
+
+	grep -i -r -v <pattern> <filename>
+	tail -n <filename>
+	head -n <filename>
+
+	top
+	df
+	du
+	free
+	kill <process>
+	
+	ping <hostname>
+	curl <url>
+	ssh <user@hostname>
+
+	zip -r -u -d -e -x <archive> <file1> <file2>
+	unzip -l -t -d -o -x <archive>
+	tar -c -x -t -z -v -f <archive> <file1> <file2>
+
+	rwx:421 ---> owner, group, others
+	chamo -R -v <mode> <file> 
+	
+GIT:
+	git log -p(--patch)=-2 --stat --pretty=oneline,short,full,fuller,format:"%x..." --graph 
+		--since=2.weeks --until=2008-01-15 --author --grep --S -- path/to/file
+								--->in reverse chronological order
+	git commit --amend --> overwrite previous commit
+	git reset(restore) HEAD <file> (reverts the staged file to the working dir) --hard (dangerous) 
+	git checkout(restore) -- <file> (reverts working directory changes to the last commit) (DANGEROUS ->
+			STASH OR BRANCH INSTEAD)
+
+	git clone <url>
+	git remote -v, git remote add <shortname> <url> git remote rename <n1> <n2>, git remote remove <n>,
+			git remote show <remotename> 
+				---> local and remote branches connect to one another, 1 connection only
+	git fetch <remotename> ---> pulls all missing data from a remote, to be inspected or merged
+	git pull = git fetch + git merge --><>< git config --global pull.rebase "false/true"
+	git push <remotename> <branch>
+
+HYDRA: -> dynamically creates hierarchical configurations by compositions - config files : multiple jobs
+	.py -> from omegaconf import DictConfig, OmegaConf
+			      import Hydra
+			      import logging
+			
+		log = logging.get_logger(__name__)
+		
+		@hydra.main(version_base=None, config_path=".", config_name="config"
+		def my_app(cfg):
+			print(OmegaConf.to_yaml(cfg))
+			print(os.getcwd())
+			print(hydra.code.hydra_onfig.HydraConfig.get().runtime.otput_dir)
+		access by attribute or dictionary style to available config entries		
+
+	cfg -> @hyfra.main, add config values (fields) with "+" in command line	
+		conf_ db_ MySQL.yaml, PostgreSQL.yam ---> + to access subdirectories
+		*defaults:\n - dir/file ---> ~ to override default entry, db.xx=yy to individual vals.
+		*hydra/sweeper/params
+
+	.yaml -> yaml format q:\n x:x \n y:s \n z:s
+
+	cmd -> python my_app hydra.mode=MULTIRUN/RUN db=MySQL,postgresql schema=warehouse,support,school
+	       python my_app.py --multirun(-m) db=MySQL,postgresql schema=warehouse,support,school
+			---> LOCAL AND SERIAL MULTIRUN...
+
+	

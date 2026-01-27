@@ -1,9 +1,10 @@
-function [spike_times,spike_ids,Irc,tc] = TauLeaping_Adaptive_EImodel(W,response_fn,beta,alpha,I,t_min,t_max,init_state,args)
+function [spike_times,spike_ids,Irc,time_points] = TauLeaping_Adaptive_EImodel(W,response_fn,beta,alpha,I,t_min,t_max,init_state,args)
 % This is an adjacent implementaion of the Tau Leaping Algorithm
 % which adaptively modifies the time-leap constant Tau according
 % to pre-defined error bounds and criticality conditions. For more
 % information, check the papers under the References section. 
 %
+%                       EXPERIMENTAL
 % Inputs:
 % - W [N,N]: is the weight matrix,  W(i,j) is synaptic weight
 % to the ith neuron FROM the jth
@@ -50,7 +51,7 @@ nc = 10;
 
 N = size(W,1);
 Tau = 0.1;
-Irc = []
+Irc = [];
 
 time_points = t_min:Tau:t_max;
 active = init_state(1,:)';
