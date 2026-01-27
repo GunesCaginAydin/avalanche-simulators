@@ -92,6 +92,7 @@ end
         for n=1:Nactive
 
             neuron = IDactive(n); % active neurons in the current frame
+
             % coordinates (Coord is in pixels):
             xm = Centers(neuron,1);
             ym = Centers(neuron,2);
@@ -113,10 +114,12 @@ end
                 for j=1:ny
                     for k=1:nz
                     c = c+1;
-                    u(c,:) = [x(i) y(j) z(k)];
+                    u(c,:) = [x(i) y(j) z(k)]; % CHANGE?
                     end
                 end
             end
+
+            %u = combvec(x,y,z)'; % ??
 
             % check if they don't cross borders:
             x = u(:,1);
@@ -133,17 +136,14 @@ end
             for i = 1:size(pixs,1)
             Tensor_coarse(pixs(i,1),pixs(i,2),pixs(i,3)) = 1;
             end
-            clear u
         end
     
     
         % Get connected components(clusters):
         %----------------------------------------------------------------------
-        cc = bwconncomp(Tensor_coarse); % connected comp. in the coarse-grained tensor        
-        clear Tensor_coarse
+        cc = bwconncomp(Tensor_coarse); % connected comp. in the coarse-grained tensor     
         Nob = cc.NumObjects; % nuber of clusters
         Lin = find(Tensor);
-        clear Tensor
         Comps = cell(1,Nob);
         Csize = zeros(1,Nob);
         for j=1:Nob
@@ -161,9 +161,8 @@ end
         % The first column of Ct indicates wether each neuron participates
         % in a cluster. The second column indicates in which cluster the
         % neuron participates.
-        Ct = zeros(N,2);    
+        Ct = zeros(N,2);  
         for j=1:nc
-            
             nn = Comps{j};     
             ii =  ismember(LinIndx(:,1),nn) ;
             units = LinIndx(ii,2);
@@ -186,9 +185,7 @@ end
             counter = 0;
             
             temp = Ct(:,2);
-
             for j=1:nc    
-
                 neuron_in_cluster = (temp==j) ; % neurons participating in cluster j at current time t    
                 indx = neuron_in_cluster.*Ctprev(:,1); % neurons active at time t and t-1
                 int = sum(indx)>0; 
@@ -225,7 +222,7 @@ end
         %
         % Av_Center : matrix of (cluster labels)x(time frames) size
         % with entries equal to the center of mass of neurons active in cluster k
-        % at time t        
+        % at time t     
         for j=1:length(clus)
            neurons = find( Ct(:,2) == clus(j) );  
            nb = sum( Ct(:,2) == clus(j) ); 

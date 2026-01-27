@@ -59,7 +59,7 @@ elseif inputmethod == 5
     amp2 = 0.01;
     freq2 = 0.01;
     I1 = amp1*ones(N,t_max/2);
-    I2 = repmat(amp2*sin(freq2*(t_max/2:1:t_max+5)),N,1) + amp2;
+    I2 = amp2*sin(freq2*(t_min:1:2*t_max)) + amp2;
     I = [I1 I2];
 end
 

@@ -51,7 +51,7 @@ val = values(args);
 mode = val(1);
 
 N = size(W,1);
-Tau = 0.5;
+Tau = 1;
 
 time_points = t_min:Tau:t_max;
 active = init_state(1,:)';
@@ -71,7 +71,7 @@ propensity = beta .* ~active .* feval(response_fn, current) + ...
 
 for t=t_min:Tau:t_max
     num_events = poissrnd(propensity * Tau);
-    
+    sum(num_events)
     for i = 1:N
         if num_events(i) > 0 
             if mod(num_events(i),2)==1
@@ -104,17 +104,36 @@ end
 for i=1:size(network_states,2)
     if mode == 0 % DOES NOT WORK - NEED TO CHANGE BIN STRATEGY
         add = repmat(time_points(i),1,sum(network_states(:,i)));
-    elseif mode == 1
+    elseif mode == 1 % DOES NOT WORK - NEED TO CHANGE BIN STRATEGY
         add = linspace(time_points(i), time_points(i)+Tau, sum(network_states(:,i)));
-    elseif mode == 2
-        add = linspace(time_points(i), time_points(i)+Tau, sum(network_states(:,i))) + rand(1, sum(network_states(:,i)))*0.1*Tau;
+    elseif mode == 2 % UNIFORM AROUND POINTS
+        add = linspace(time_points(i), time_points(i)+Tau, sum(network_states(:,i))) + rand([1, sum(network_states(:,i))])*0.1*Tau;
         if ~isempty(spike_times) && (spike_times(1)<=0)
             spike_times(1) = 0;
         end
-    elseif mode == 3
+    elseif mode == 3 % UNIFORM AROUND WHOLE INTERVAL
         U = time_points(i)+Tau;
         L = time_points(i);
-        add = rand(1, sum(network_states(:,i)))*(U-L) + L;
+        add = rand([1, sum(network_states(:,i))])*(U-L) + L;
+    elseif mode == 4 % GAUSSIAN AROUND WHOLE INTERVAL
+        U = time_points(i)+Tau;
+        L = time_points(i);
+        mu = mean([U,L]);
+        var = Tau/2;
+        add = normrnd(mu,var,[1, sum(network_states(:,i))]);
+    elseif mode == 5 % POISSON AROUND WHOLE INTERVAL - Gillespie Imitation
+        add = zeros([1, sum(network_states(:,i))]);
+        for j=1:length(add)
+            taup = -log(rand)/sum(network_states(:,i));
+            if j==1
+                add(j) = taup;
+            else
+                add(j) = taup + add(j-1);
+            end
+        end
+        U = time_points(i)+Tau;
+        L = time_points(i);
+        add = add*(U-L) + L;
     end
     spike_times = [spike_times add];
     spike_ids = [spike_ids find(network_states(:,i)')];
